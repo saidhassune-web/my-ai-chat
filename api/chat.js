@@ -1,21 +1,2 @@
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  try {
-    let raw = '';
-    for await (const chunk of req) raw += chunk;
-    let body = {};
-    try { body = JSON.parse(raw); } catch {}
-    const message = body.message;
-    const r = await fetch(process.env.AI_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.AI_API_KEY },
-      body: JSON.stringify({ model: process.env.AI_MODEL, messages: [{ role: 'user', content: message }] })
-    });
-    const txt = await r.text();
-    let j; try { j = JSON.parse(txt); } catch { return res.status(500).json({ error: txt.slice(0,400) }); }
-    return res.status(200).json(j);
-  } catch (e) { return res.status(500).json({ error: e.message }); }
-};
+
+export default async function handler(req, res){ if(req.method !== 'POST') return res.status(405).json({error:'Method not allowed'}); try{ const r = await fetch("https://openrouter.ai/api/v1/chat/completions", { method:"POST", headers:{ "Authorization": Bearer ${process.env.OPENROUTER_KEY}, "Content-Type":"application/json", "HTTP-Referer": "https://your-domain.com", "X-Title": "Said-AI" }, body: JSON.stringify(req.body) }); const data = await r.json(); res.status(r.status).json(data); }catch(e){ res.status(500).json({error: e.message}); } }
